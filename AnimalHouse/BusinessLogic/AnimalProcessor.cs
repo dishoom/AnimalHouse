@@ -57,15 +57,15 @@ namespace AnimalHouse.BusinessLogic
             }
         }
 
-        public async Task<List<Animal>> GetAnimalById(int animalId)
+        public async Task<Animal> GetAnimalById(int animalId)
         {
             using (_context)
             {
-                var animals = await _context.Animals
+                var animal = await _context.Animals
                     .Where(a => a.id == animalId)
-                    .ToListAsync();
+                    .FirstOrDefaultAsync();
 
-                return animals;
+                return animal;
             }
         }
 

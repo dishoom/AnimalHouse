@@ -7,6 +7,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AnimalHouse", "AnimalHouse\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AnimalHouse.Test", "AnimalHouse.Test\AnimalHouse.Test.csproj", "{C49CEC98-E043-4B08-AEAE-48C4C8790EF1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AnimalHouseAPI", "AnimalHouseAPI\AnimalHouseAPI.csproj", "{95B3A33C-2107-4E37-9793-052C38994166}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AnimalHouseAPI.Tests", "AnimalHouseAPI.Tests\AnimalHouseAPI.Tests.csproj", "{30482937-A5D4-4037-8E68-176FC762CE3B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +25,14 @@ Global
 		{C49CEC98-E043-4B08-AEAE-48C4C8790EF1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C49CEC98-E043-4B08-AEAE-48C4C8790EF1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C49CEC98-E043-4B08-AEAE-48C4C8790EF1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{95B3A33C-2107-4E37-9793-052C38994166}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{95B3A33C-2107-4E37-9793-052C38994166}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{95B3A33C-2107-4E37-9793-052C38994166}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{95B3A33C-2107-4E37-9793-052C38994166}.Release|Any CPU.Build.0 = Release|Any CPU
+		{30482937-A5D4-4037-8E68-176FC762CE3B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{30482937-A5D4-4037-8E68-176FC762CE3B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{30482937-A5D4-4037-8E68-176FC762CE3B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{30482937-A5D4-4037-8E68-176FC762CE3B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
