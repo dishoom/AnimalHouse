@@ -55,6 +55,7 @@
     <Compile Include="Model\Animal.cs" />
     <Compile Include="Model\AnimalHouseDbContext.cs" />
     <Compile Include="Model\Kennel.cs" />
+    <Compile Include="Model\KennelAnimals.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

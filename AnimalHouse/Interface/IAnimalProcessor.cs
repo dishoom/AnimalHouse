@@ -9,7 +9,7 @@ namespace AnimalHouse.Interface
 {
     public interface IAnimalProcessor
     {
-        Task<Animal> AddAnimalToShelter(Animal animal);
+        Task<bool> AddAnimalToShelterAsync(Animal animal);
         //Task<bool> RemoveAnimalByName(string animalName);
         //Task<bool> RemoveAnimalById(int animalId);
         //Task<bool> ReorganizeAnimalsToAppropriateKennels();

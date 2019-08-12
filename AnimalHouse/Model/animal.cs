@@ -7,11 +7,11 @@ using System.Threading.Tasks;
 namespace AnimalHouse.Model
 {
     public class Animal
-    {
+    {        
         public int id { get; set; }
         public string type { get; set; }
         public string name { get; set; }
-        public int sizeInLbs { get; set; }
+        public double sizeInLbs { get; set; }
         public int kennelId { get; set; }
         public Kennel Kennel { get; set; }
     }

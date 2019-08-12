@@ -47,5 +47,29 @@ namespace AnimalHouse.BusinessLogic
 
             return await query.FirstOrDefaultAsync();
         }
+
+        public async Task<List<KennelAnimals>> GetAnimalsInEachKennelAsync()
+        {
+            var animalProcessor = new AnimalProcessor(_context, null);
+            var kennelAnimalReport = new List<KennelAnimals>();
+
+            var kennels = await GetKennelsAsync();
+
+            foreach(var kennel in kennels)
+            {
+                var kennelAnimals = new KennelAnimals{
+                    id = kennel.id,
+                    name = kennel.name,
+                    minAnimalSize = kennel.minAnimalSize,
+                    maxAminalSize = kennel.maxAminalSize,
+                    maxLimit = kennel.maxLimit
+                };
+
+                kennelAnimals.animals = await animalProcessor.GetAnimalsInKennel(kennel.id);
+                kennelAnimalReport.Add(kennelAnimals);
+            }
+
+            return kennelAnimalReport;
+        }
     }
 }
