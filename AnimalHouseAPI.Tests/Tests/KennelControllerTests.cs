@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
@@ -8,15 +9,15 @@ using AnimalHouse.Model;
 using AnimalHouseAPI.Controllers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using Newtonsoft.Json;
 using System.Threading.Tasks;
 using System.Net.Http;
 using System.Web.Http;
-using AnimalHouseAPI.Models;
 
 namespace AnimalHouseAPI.Tests
 {
     [TestClass]
-    public class AnimalControllerTests
+    public class KennelControllerTests
     {
         private List<Kennel> _kennelData;
         private List<Animal> _animalData;
@@ -75,72 +76,20 @@ namespace AnimalHouseAPI.Tests
         }
 
         [TestMethod]
-        public async Task AddAnimalTest()
+        public async Task GetKennelReportTestAsync()
         {
             var kennelProcessor = new KennelProcessor(_mockContext.Object);
-            var animalProcessor = new AnimalProcessor(_mockContext.Object, kennelProcessor);
-            var animalController = new AnimalController(animalProcessor);
+            var kennelController = new KennelController(kennelProcessor);
 
-            animalController.Request = new HttpRequestMessage();
-            animalController.Configuration = new HttpConfiguration();
+            kennelController.Request = new HttpRequestMessage();
+            kennelController.Configuration = new HttpConfiguration();
 
-            var animalToAdd = new AnimalModel{ name="fluffy", type="dog", sizeInLbs=32.1 };
-
-            var goodResponse = await animalController.Add(animalToAdd);
-            Assert.IsTrue(goodResponse.StatusCode == System.Net.HttpStatusCode.OK);
-
-            var badResponse = await animalController.Add(null);
-            Assert.IsFalse(badResponse.IsSuccessStatusCode);
-        }
-
-        [TestMethod]
-        public async Task RemoveAnimalByIdTest()
-        {
-            var kennelProcessor = new KennelProcessor(_mockContext.Object);
-            var animalProcessor = new AnimalProcessor(_mockContext.Object, kennelProcessor);
-            var animalController = new AnimalController(animalProcessor);
-
-            animalController.Request = new HttpRequestMessage();
-            animalController.Configuration = new HttpConfiguration();
+            var response = await kennelController.ReportAsync();
             
-            var goodResponse = await animalController.RemoveById(1);
-            Assert.IsTrue(goodResponse.StatusCode == System.Net.HttpStatusCode.OK);
+            List<KennelAnimals> kennels;
 
-            var badResponse = await animalController.RemoveById(367); //does not exist
-            Assert.IsFalse(badResponse.IsSuccessStatusCode);
-        }
-
-        [TestMethod]
-        public async Task RemoveAnimalTest()
-        {
-            var kennelProcessor = new KennelProcessor(_mockContext.Object);
-            var animalProcessor = new AnimalProcessor(_mockContext.Object, kennelProcessor);
-            var animalController = new AnimalController(animalProcessor);
-
-            animalController.Request = new HttpRequestMessage();
-            animalController.Configuration = new HttpConfiguration();
-
-            var animalToRemove = new AnimalModel { name = "Fido", type = "Dog", sizeInLbs = 12 };
-
-            var goodResponse = await animalController.RemoveAnimal(animalToRemove);
-            Assert.IsTrue(goodResponse.StatusCode == System.Net.HttpStatusCode.OK);
-            
-            var badResponse = await animalController.RemoveAnimal(null);
-            Assert.IsFalse(badResponse.IsSuccessStatusCode);
-        }
-
-        [TestMethod]
-        public async Task ReorganizeAnimalsTest()
-        {
-            var kennelProcessor = new KennelProcessor(_mockContext.Object);
-            var animalProcessor = new AnimalProcessor(_mockContext.Object, kennelProcessor);
-            var animalController = new AnimalController(animalProcessor);
-
-            animalController.Request = new HttpRequestMessage();
-            animalController.Configuration = new HttpConfiguration();
-
-            var response = await animalController.ReorganizeAnimalsAsync();
-            Assert.IsTrue(response.StatusCode == System.Net.HttpStatusCode.OK);
+            Assert.IsTrue(response.TryGetContentValue(out kennels));
+            Assert.AreEqual(3, kennels.Count);
         }
     }
 }

@@ -115,7 +115,7 @@ namespace AnimalHouse.Test
             var kennelProcessor = new KennelProcessor(_mockContext.Object);
             var animalProcessor = new AnimalProcessor(_mockContext.Object, kennelProcessor);
 
-            var wasAnimalRemoved = await animalProcessor.RemoveAnimalById(1);
+            var wasAnimalRemoved = await animalProcessor.RemoveAnimalByIdAsync(1);
             Assert.IsTrue(wasAnimalRemoved);
 
             var shouldBeNull = _animalData.Where(a => a.animalId == 1).FirstOrDefault();
@@ -128,7 +128,7 @@ namespace AnimalHouse.Test
             var kennelProcessor = new KennelProcessor(_mockContext.Object);
             var animalProcessor = new AnimalProcessor(_mockContext.Object, kennelProcessor);
 
-            var wasAnimalRemoved = await animalProcessor.RemoveAnimalByNameAndTypeAndSize("Fido", "Dog", 12);
+            var wasAnimalRemoved = await animalProcessor.RemoveAnimalByNameAndTypeAndSizeAsync("Fido", "Dog", 12);
             Assert.IsTrue(wasAnimalRemoved);
 
             var shouldBeNull = _animalData.Where(a => a.animalId == 1).FirstOrDefault();
@@ -145,7 +145,7 @@ namespace AnimalHouse.Test
             _kennelData.Remove(_kennelData.Where(k => k.kennelId == 2).First());
             _kennelData.Remove(_kennelData.Where(k => k.kennelId == 3).First());
 
-            var wasRestructureSuccess = await animalProcessor.ReorganizeAnimalsToAppropriateKennels();
+            var wasRestructureSuccess = await animalProcessor.ReorganizeAnimalsToAppropriateKennelsAsync();
 
             Assert.IsFalse(wasRestructureSuccess);
         }
@@ -159,7 +159,7 @@ namespace AnimalHouse.Test
             //set capacity for each kennel to 1, which should force the business logic to fail
             _kennelData.ForEach(k => k.maxLimit = 1);
 
-            var wasRestructureSuccess = await animalProcessor.ReorganizeAnimalsToAppropriateKennels();
+            var wasRestructureSuccess = await animalProcessor.ReorganizeAnimalsToAppropriateKennelsAsync();
 
             Assert.IsFalse(wasRestructureSuccess);
         }
@@ -171,7 +171,7 @@ namespace AnimalHouse.Test
             var animalProcessor = new AnimalProcessor(_mockContext.Object, kennelProcessor);
 
             //test that the count of animals in small kennel is 2 before the restructure
-            var smallAnimalsBeforeRestructure = await animalProcessor.GetAnimalsInKennel(1);
+            var smallAnimalsBeforeRestructure = await animalProcessor.GetAnimalsInKennelAsync(1);
 
             //reorganizing the kennel sizes
             //increase small size definition to be less than than 30 lbs
@@ -179,8 +179,8 @@ namespace AnimalHouse.Test
             _kennelData.Where(k => k.name == "small").ToList().ForEach(k => k.maxAminalSize = 30);
             _kennelData.Where(k => k.name == "medium").ToList().ForEach(k => k.minAnimalSize = 30);          
 
-            var wasRestructureSuccess = await animalProcessor.ReorganizeAnimalsToAppropriateKennels();
-            var smallAnimalsAfterRestructure = await animalProcessor.GetAnimalsInKennel(1);
+            var wasRestructureSuccess = await animalProcessor.ReorganizeAnimalsToAppropriateKennelsAsync();
+            var smallAnimalsAfterRestructure = await animalProcessor.GetAnimalsInKennelAsync(1);
 
             Assert.IsTrue(wasRestructureSuccess);
             Assert.IsTrue(smallAnimalsBeforeRestructure.Count == 2);

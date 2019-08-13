@@ -30,7 +30,7 @@ namespace AnimalHouseAPI.Controllers
         
         [Route("api/Animal/Add")]
         [HttpPost]
-        public async Task<HttpResponseMessage> Add([FromBody]AnimalModel animal)
+        public async Task<HttpResponseMessage> AddAsync([FromBody]AnimalModel animal)
         {
             double lbs;
 
@@ -61,14 +61,14 @@ namespace AnimalHouseAPI.Controllers
 
         [Route("api/Animal/RemoveById")]
         [HttpPost]
-        public async Task<HttpResponseMessage> RemoveById([FromBody] int animalId)
+        public async Task<HttpResponseMessage> RemoveByIdAsync([FromBody] int animalId)
         {
             if (!int.TryParse(animalId.ToString(), out animalId))
                 return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Animal Id is not valid");
 
             try
             {
-                var success = await _animalProcessor.RemoveAnimalById(animalId);
+                var success = await _animalProcessor.RemoveAnimalByIdAsync(animalId);
 
                 if (success)
                     return Request.CreateResponse(HttpStatusCode.OK);
@@ -83,7 +83,7 @@ namespace AnimalHouseAPI.Controllers
 
         [Route("api/Animal/RemoveAnimal")]
         [HttpPost]
-        public async Task<HttpResponseMessage> RemoveAnimal([FromBody]AnimalModel animal)
+        public async Task<HttpResponseMessage> RemoveAnimalAsync([FromBody]AnimalModel animal)
         {
             double lbs;
 
@@ -98,7 +98,7 @@ namespace AnimalHouseAPI.Controllers
 
             try
             {
-                var success = await _animalProcessor.RemoveAnimalByNameAndTypeAndSize(animal.name, animal.type, animal.sizeInLbs);
+                var success = await _animalProcessor.RemoveAnimalByNameAndTypeAndSizeAsync(animal.name, animal.type, animal.sizeInLbs);
                 if (success)
                     return Request.CreateResponse(HttpStatusCode.OK);
                 else
@@ -116,7 +116,7 @@ namespace AnimalHouseAPI.Controllers
         {
             try
             {
-                var success = await _animalProcessor.ReorganizeAnimalsToAppropriateKennels();
+                var success = await _animalProcessor.ReorganizeAnimalsToAppropriateKennelsAsync();
 
                 if (success)
                     return Request.CreateResponse(HttpStatusCode.OK);

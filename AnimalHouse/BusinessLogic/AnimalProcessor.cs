@@ -54,7 +54,7 @@ namespace AnimalHouse.BusinessLogic
             }
         }
 
-        public async Task<List<Animal>> GetAnimalsInKennel(int kennelId)
+        public async Task<List<Animal>> GetAnimalsInKennelAsync(int kennelId)
         {
             using (_context)
             {
@@ -66,7 +66,7 @@ namespace AnimalHouse.BusinessLogic
             }
         }
 
-        public async Task<Animal> GetAnimalById(int animalId)
+        public async Task<Animal> GetAnimalByIdAsync(int animalId)
         {
             using (_context)
             {
@@ -78,7 +78,7 @@ namespace AnimalHouse.BusinessLogic
             }
         }
 
-        public async Task<Animal> GetAnimalByNameAndTypeAndSize(string name, string type, double size)
+        public async Task<Animal> GetAnimalByNameAndTypeAndSizeAsync(string name, string type, double size)
         {
             using (_context)
             {
@@ -92,7 +92,7 @@ namespace AnimalHouse.BusinessLogic
             }
         }
 
-        public async Task<bool> RemoveAnimalById(int animalId)
+        public async Task<bool> RemoveAnimalByIdAsync(int animalId)
         {
             using (_context)
             {
@@ -111,7 +111,7 @@ namespace AnimalHouse.BusinessLogic
             }
         }
 
-        public async Task<bool> RemoveAnimalByNameAndTypeAndSize(string name, string type, double size)
+        public async Task<bool> RemoveAnimalByNameAndTypeAndSizeAsync(string name, string type, double size)
         {
             using (_context)
             {
@@ -134,7 +134,7 @@ namespace AnimalHouse.BusinessLogic
             }
         }
 
-        public async Task<bool> ReorganizeAnimalsToAppropriateKennels()
+        public async Task<bool> ReorganizeAnimalsToAppropriateKennelsAsync()
         {
             //Get list of kennels and their properties
             //For each animal, reorganize into approriate kennel (without commiting changes to db)

@@ -28,7 +28,7 @@ namespace AnimalHouseAPI.Controllers
                 
         [Route("api/Kennel/Report")]
         [HttpGet]
-        public async Task<HttpResponseMessage> Report()
+        public async Task<HttpResponseMessage> ReportAsync()
         {
             try
             {
