@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -7,8 +8,9 @@ using System.Threading.Tasks;
 namespace AnimalHouse.Model
 {
     public class Animal
-    {        
-        public int id { get; set; }
+    {
+        [Key]
+        public int animalId { get; set; }
         public string type { get; set; }
         public string name { get; set; }
         public double sizeInLbs { get; set; }

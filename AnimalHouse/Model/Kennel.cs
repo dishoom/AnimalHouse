@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,7 +11,8 @@ namespace AnimalHouse.Model
     {
         internal int count;
 
-        public int id { get; set; }
+        [Key]
+        public int kennelId { get; set; }
         public string name { get; set; }
         public int minAnimalSize { get; set; }
         public int maxAminalSize { get; set; }

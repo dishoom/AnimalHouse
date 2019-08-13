@@ -1,4 +1,5 @@
-﻿using AnimalHouse.Interface;
+﻿using AnimalHouse.Data;
+using AnimalHouse.Interface;
 using AnimalHouse.Model;
 using System;
 using System.Collections.Generic;
@@ -30,7 +31,7 @@ namespace AnimalHouse.BusinessLogic
             var animalAccepted = false;
 
             var appropriateKennel = await _kennelProcessor.GetKennelByAnimalSizeAsync(animal.sizeInLbs);
-            var animalsInKennel = await GetAnimalsInKennel(appropriateKennel.id);
+            var animalsInKennel = await GetAnimalsInKennel(appropriateKennel.kennelId);
 
             if (animalsInKennel.Count() < appropriateKennel.maxLimit)
             {
@@ -62,7 +63,7 @@ namespace AnimalHouse.BusinessLogic
             using (_context)
             {
                 var animal = await _context.Animals
-                    .Where(a => a.id == animalId)
+                    .Where(a => a.animalId == animalId)
                     .FirstOrDefaultAsync();
 
                 return animal;
@@ -87,7 +88,7 @@ namespace AnimalHouse.BusinessLogic
         {
             using (_context)
             {
-                var animalToRemove = _context.Animals.Where(a => a.id == animalId).FirstOrDefault();
+                var animalToRemove = _context.Animals.Where(a => a.animalId == animalId).FirstOrDefault();
                 
                 if (animalToRemove != null)
                 {
@@ -150,14 +151,14 @@ namespace AnimalHouse.BusinessLogic
                     var kennelForThisAnimal = await _kennelProcessor.GetKennelByAnimalSizeAsync(animal.sizeInLbs);
 
                     if (kennelForThisAnimal != null)
-                        animal.kennelId = kennelForThisAnimal.id;
+                        animal.kennelId = kennelForThisAnimal.kennelId;
                     else
                         success = false; //condition met if no kennels accept this animal's size
                 }
 
                 foreach (var kennel in kennels)
                 {
-                    var animalCountInKennel = animals.Where(a => a.kennelId == kennel.id).Count();
+                    var animalCountInKennel = animals.Where(a => a.kennelId == kennel.kennelId).Count();
 
                     if (animalCountInKennel > kennel.maxLimit)
                         success = false; //condition met if kennels are over capacity                     

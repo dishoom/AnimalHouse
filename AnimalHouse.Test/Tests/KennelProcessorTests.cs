@@ -5,6 +5,7 @@ using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Threading.Tasks;
 using AnimalHouse.BusinessLogic;
+using AnimalHouse.Data;
 using AnimalHouse.Model;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -28,18 +29,18 @@ namespace AnimalHouse.Test
         {
             _kennelData = new List<Kennel>()
             {
-                new Kennel {id = 1, name = "small", maxLimit = 16, minAnimalSize = 0, maxAminalSize = 20},
-                new Kennel {id = 2, name = "medium", maxLimit = 10, minAnimalSize = 20, maxAminalSize = 50},
-                new Kennel {id = 3, name = "large", maxLimit = 8, minAnimalSize = 50, maxAminalSize = int.MaxValue}
+                new Kennel {kennelId = 1, name = "small", maxLimit = 16, minAnimalSize = 0, maxAminalSize = 20},
+                new Kennel {kennelId = 2, name = "medium", maxLimit = 10, minAnimalSize = 20, maxAminalSize = 50},
+                new Kennel {kennelId = 3, name = "large", maxLimit = 8, minAnimalSize = 50, maxAminalSize = int.MaxValue}
             };
 
             _animalData = new List<Animal>()
             {
-                new Animal() {id = 1, name = "Fido", type = "Dog", sizeInLbs = 12, kennelId = 1, Kennel=_kennelData.Where(k=>k.id == 1).First() },
-                new Animal() {id = 2, name = "Mr. Whiskers", type = "Cat", sizeInLbs = 3, kennelId = 1, Kennel=_kennelData.Where(k=>k.id == 1).First() },
-                new Animal() {id = 3, name = "Spot", type = "Dog", sizeInLbs = 23, kennelId = 2, Kennel=_kennelData.Where(k=>k.id == 2).First() },
-                new Animal() {id = 4, name = "Stretch", type = "Giraffe", sizeInLbs = 1800, kennelId = 3, Kennel=_kennelData.Where(k=>k.id == 3).First() },
-                new Animal() {id = 5, name = "Mr. Ed", type = "Horse", sizeInLbs = 920, kennelId = 3, Kennel=_kennelData.Where(k=>k.id == 3).First() },
+                new Animal() {animalId = 1, name = "Fido", type = "Dog", sizeInLbs = 12, kennelId = 1, Kennel=_kennelData.Where(k=>k.kennelId == 1).First() },
+                new Animal() {animalId = 2, name = "Mr. Whiskers", type = "Cat", sizeInLbs = 3, kennelId = 1, Kennel=_kennelData.Where(k=>k.kennelId == 1).First() },
+                new Animal() {animalId = 3, name = "Spot", type = "Dog", sizeInLbs = 23, kennelId = 2, Kennel=_kennelData.Where(k=>k.kennelId == 2).First() },
+                new Animal() {animalId = 4, name = "Stretch", type = "Giraffe", sizeInLbs = 1800, kennelId = 3, Kennel=_kennelData.Where(k=>k.kennelId == 3).First() },
+                new Animal() {animalId = 5, name = "Mr. Ed", type = "Horse", sizeInLbs = 920, kennelId = 3, Kennel=_kennelData.Where(k=>k.kennelId == 3).First() },
             };
 
             _kennelDataQueryable = _kennelData.AsQueryable();
@@ -76,9 +77,9 @@ namespace AnimalHouse.Test
         {
             var kennelData = new List<Kennel>()
             {
-                new Kennel {id = 1, name = "small", maxLimit = 16, minAnimalSize = 0, maxAminalSize = 20},
-                new Kennel {id = 2, name = "medium", maxLimit = 10, minAnimalSize = 20, maxAminalSize = 50},
-                new Kennel {id = 3, name = "large", maxLimit = 8, minAnimalSize = 50, maxAminalSize = int.MaxValue}
+                new Kennel {kennelId = 1, name = "small", maxLimit = 16, minAnimalSize = 0, maxAminalSize = 20},
+                new Kennel {kennelId = 2, name = "medium", maxLimit = 10, minAnimalSize = 20, maxAminalSize = 50},
+                new Kennel {kennelId = 3, name = "large", maxLimit = 8, minAnimalSize = 50, maxAminalSize = int.MaxValue}
             }.AsQueryable();
 
 

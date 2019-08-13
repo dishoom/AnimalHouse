@@ -9,8 +9,6 @@ namespace AnimalHouseAPI
     {
         public static void Register(HttpConfiguration config)
         {
-            // Web API configuration and services
-
             // Web API routes
             config.MapHttpAttributeRoutes();
 
@@ -19,6 +17,13 @@ namespace AnimalHouseAPI
                 routeTemplate: "api/{controller}/{id}",
                 defaults: new { id = RouteParameter.Optional }
             );
+
+            //remove default xml formatter
+            config.Formatters.XmlFormatter.SupportedMediaTypes.Clear();
+
+            //add json formatter
+            config.Formatters.JsonFormatter.SerializerSettings.Formatting = Newtonsoft.Json.Formatting.Indented;
+
         }
     }
 }

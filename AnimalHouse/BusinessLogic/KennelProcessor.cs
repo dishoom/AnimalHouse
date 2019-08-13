@@ -1,4 +1,5 @@
-﻿using AnimalHouse.Interface;
+﻿using AnimalHouse.Data;
+using AnimalHouse.Interface;
 using AnimalHouse.Model;
 using System;
 using System.Collections.Generic;
@@ -32,44 +33,57 @@ namespace AnimalHouse.BusinessLogic
 
         public async Task<List<Kennel>> GetKennelsAsync()
         {
-            var query = from k in _context.Kennels
-                        orderby k.id
-                        select k;
+            using (_context)
+            {
+                var kennels = await _context.Kennels
+                    .OrderBy(k => k.kennelId)
+                    .ToListAsync();
 
-            return await query.ToListAsync();
+                return kennels;
+            }
         }
 
         public async Task<Kennel> GetKennelsByIdAsync(int id)
         {
-            var query = from k in _context.Kennels
-                        where k.id == id
-                        select k;
+            using (_context)
+            {
+                var kennel = await _context.Kennels
+                    .Where(k => k.kennelId == id)
+                    .FirstOrDefaultAsync();
 
-            return await query.FirstOrDefaultAsync();
+                return kennel;
+            }
         }
 
         public async Task<List<KennelAnimals>> GetAnimalsInEachKennelAsync()
         {
-            var animalProcessor = new AnimalProcessor(_context, null);
-            var kennelAnimalReport = new List<KennelAnimals>();
+            using (_context)
+            {                
+                var kennelAnimalReport = new List<KennelAnimals>();
 
-            var kennels = await GetKennelsAsync();
+                var kennels = await _context.Kennels
+                                        .OrderBy(k => k.kennelId)
+                                        .ToListAsync();
 
-            foreach(var kennel in kennels)
-            {
-                var kennelAnimals = new KennelAnimals{
-                    id = kennel.id,
-                    name = kennel.name,
-                    minAnimalSize = kennel.minAnimalSize,
-                    maxAminalSize = kennel.maxAminalSize,
-                    maxLimit = kennel.maxLimit
-                };
+                foreach (var kennel in kennels)
+                {
+                    var kennelAnimals = new KennelAnimals{
+                        kennelId = kennel.kennelId,
+                        name = kennel.name,
+                        minAnimalSize = kennel.minAnimalSize,
+                        maxAminalSize = kennel.maxAminalSize,
+                        maxLimit = kennel.maxLimit
+                    };
 
-                kennelAnimals.animals = await animalProcessor.GetAnimalsInKennel(kennel.id);
-                kennelAnimalReport.Add(kennelAnimals);
+                    kennelAnimals.animals = await _context.Animals
+                                                    .Where(a => a.kennelId == kennel.kennelId)
+                                                    .ToListAsync();
+
+                    kennelAnimalReport.Add(kennelAnimals);
+                }
+
+                return kennelAnimalReport;
             }
-
-            return kennelAnimalReport;
         }
     }
 }

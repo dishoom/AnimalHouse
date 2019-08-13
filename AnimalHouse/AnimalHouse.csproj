@@ -50,10 +50,11 @@
   <ItemGroup>
     <Compile Include="BusinessLogic\AnimalProcessor.cs" />
     <Compile Include="BusinessLogic\KennelProcessor.cs" />
+    <Compile Include="Data\DatabaseInitializer.cs" />
     <Compile Include="Interface\IAnimalProcessor.cs" />
     <Compile Include="Interface\IKennelProcessor.cs" />
     <Compile Include="Model\Animal.cs" />
-    <Compile Include="Model\AnimalHouseDbContext.cs" />
+    <Compile Include="Data\AnimalHouseDbContext.cs" />
     <Compile Include="Model\Kennel.cs" />
     <Compile Include="Model\KennelAnimals.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
