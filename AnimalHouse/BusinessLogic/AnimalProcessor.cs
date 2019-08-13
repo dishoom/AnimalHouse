@@ -28,22 +28,30 @@ namespace AnimalHouse.BusinessLogic
             //compare kennel capacity with current kennel count
             //add animal to kennel if kennel count is below capacity
 
-            var animalAccepted = false;
-
-            var appropriateKennel = await _kennelProcessor.GetKennelByAnimalSizeAsync(animal.sizeInLbs);
-            var animalsInKennel = await GetAnimalsInKennel(appropriateKennel.kennelId);
-
-            if (animalsInKennel.Count() < appropriateKennel.maxLimit)
+            using (_context)
             {
-                using (_context)
+                var animalAccepted = false;
+
+                var appropriateKennel = await _context.Kennels
+                    .Where(k => k.maxAminalSize >= animal.sizeInLbs)
+                    .Where(k => k.minAnimalSize < animal.sizeInLbs)
+                    .FirstOrDefaultAsync();
+
+                var numberOfAnimalsInKennel = await _context.Animals
+                    .Where(a => a.kennelId == appropriateKennel.kennelId)
+                    .CountAsync();
+
+
+                if (numberOfAnimalsInKennel < appropriateKennel.maxLimit)
                 {
+                    animal.kennelId = appropriateKennel.kennelId;
                     _context.Animals.Add(animal);
                     var whatisthisint = await _context.SaveChangesAsync();
                     animalAccepted = true;
                 }
-            }
 
-            return animalAccepted;
+                return animalAccepted;
+            }
         }
 
         public async Task<List<Animal>> GetAnimalsInKennel(int kennelId)
@@ -134,21 +142,28 @@ namespace AnimalHouse.BusinessLogic
             //               or if animal does not fit in any kennel
             //               then do not commit changes to db (no animal left behind!) and send error message to user
             //if all is good, then update animal's kennel (commit changes to db)
-
-            var success = true;
-            var kennels = await _kennelProcessor.GetKennelsAsync();
-
-            kennels.ForEach(k => k.count = 0); //reset count for each kennel
-
             using (_context)
             {
-                var animals = await _context.Animals.ToListAsync();
+                var success = true;
+
+                var kennels = await _context.Kennels
+                    .OrderBy(k => k.kennelId)
+                    .ToListAsync();
+
+                kennels.ForEach(k => k.count = 0); //reset count for each kennel
+
+
+                var animals = await _context.Animals
+                    .ToListAsync();
 
                 animals.ForEach(a => a.kennelId = 0);
 
                 foreach (var animal in animals)
                 {
-                    var kennelForThisAnimal = await _kennelProcessor.GetKennelByAnimalSizeAsync(animal.sizeInLbs);
+                    var kennelForThisAnimal = await _context.Kennels
+                                                    .Where(k => k.maxAminalSize >= animal.sizeInLbs)
+                                                    .Where(k => k.minAnimalSize < animal.sizeInLbs)
+                                                    .FirstOrDefaultAsync();
 
                     if (kennelForThisAnimal != null)
                         animal.kennelId = kennelForThisAnimal.kennelId;
@@ -166,11 +181,10 @@ namespace AnimalHouse.BusinessLogic
 
                 //only commit changes if no animals are left behind after the restructure
                 if (success)                
-                    await _context.SaveChangesAsync();                
-                    
+                    await _context.SaveChangesAsync();     
+                
+                return success;  
             }
-
-            return success;
         }
     }
 }

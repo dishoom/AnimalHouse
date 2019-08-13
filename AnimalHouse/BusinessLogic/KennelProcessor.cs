@@ -23,11 +23,10 @@ namespace AnimalHouse.BusinessLogic
         {
             using (_context)
             {
-                var appropriateKennel = _context.Kennels
+                return await _context.Kennels
                     .Where(k => k.maxAminalSize >= animalSizeInLbs)
-                    .Where(k => k.minAnimalSize < animalSizeInLbs);
-
-                return await appropriateKennel.FirstOrDefaultAsync();
+                    .Where(k => k.minAnimalSize < animalSizeInLbs)
+                    .FirstOrDefaultAsync();
             }
         }
 

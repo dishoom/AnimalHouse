@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace AnimalHouse.Data
 {
-    public class DatabaseInitializer : CreateDatabaseIfNotExists<AnimalHouseDbContext>
+    public class DatabaseInitializer : DropCreateDatabaseAlways<AnimalHouseDbContext>
     {
         protected override void Seed(AnimalHouseDbContext context)
         {

@@ -1,19 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
-using System.Threading.Tasks;
 using AnimalHouse.BusinessLogic;
 using AnimalHouse.Data;
 using AnimalHouse.Model;
+using AnimalHouseAPI.Controllers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using System.Threading.Tasks;
+using System.Net.Http;
+using System.Web.Http;
+using AnimalHouseAPI.Models;
 
-namespace AnimalHouse.Test
+namespace AnimalHouseAPI.Tests
 {
     [TestClass]
-    public class KennelProcessorTests
+    public class AnimalControllerTests
     {
         private List<Kennel> _kennelData;
         private List<Animal> _animalData;
@@ -72,74 +75,72 @@ namespace AnimalHouse.Test
         }
 
         [TestMethod]
-        public async Task GetCorrectKennelSizeForAnimalAsync()
+        public async Task AddAnimalTest()
         {
-            var kennelData = new List<Kennel>()
-            {
-                new Kennel {kennelId = 1, name = "small", maxLimit = 16, minAnimalSize = 0, maxAminalSize = 20},
-                new Kennel {kennelId = 2, name = "medium", maxLimit = 10, minAnimalSize = 20, maxAminalSize = 50},
-                new Kennel {kennelId = 3, name = "large", maxLimit = 8, minAnimalSize = 50, maxAminalSize = int.MaxValue}
-            }.AsQueryable();
+            var kennelProcessor = new KennelProcessor(_mockContext.Object);
+            var animalProcessor = new AnimalProcessor(_mockContext.Object, kennelProcessor);
+            var animalController = new AnimalController(animalProcessor);
 
+            animalController.Request = new HttpRequestMessage();
+            animalController.Configuration = new HttpConfiguration();
 
-            var mockSet = new Mock<DbSet<Kennel>>();
-            mockSet.As<IDbAsyncEnumerable<Kennel>>()
-                .Setup(k => k.GetAsyncEnumerator())
-                .Returns(new TestDbAsyncEnumerator<Kennel>(kennelData.GetEnumerator()));
+            var animalToAdd = new AnimalModel{ name="fluffy", type="dog", sizeInLbs=32.1 };
 
-            mockSet.As<IQueryable<Kennel>>()
-                .Setup(k => k.Provider)
-                .Returns(new TestDbAsyncQueryProvider<Kennel>(kennelData.Provider));
+            var goodResponse = await animalController.Add(animalToAdd);
+            Assert.IsTrue(goodResponse.StatusCode == System.Net.HttpStatusCode.OK);
 
-            mockSet.As<IQueryable<Kennel>>().Setup(k => k.Expression).Returns(kennelData.Expression);
-            mockSet.As<IQueryable<Kennel>>().Setup(k => k.ElementType).Returns(kennelData.ElementType);
-            mockSet.As<IQueryable<Kennel>>().Setup(k => k.GetEnumerator()).Returns(kennelData.GetEnumerator());
-
-
-            var mockContext = new Mock<AnimalHouseDbContext>();
-            mockContext.Setup(k => k.Kennels).Returns(mockSet.Object);
-
-            var kennelProcessor = new KennelProcessor(mockContext.Object);
-
-            var smallKennel = await kennelProcessor.GetKennelByAnimalSizeAsync(12);
-            var mediumKennel = await kennelProcessor.GetKennelByAnimalSizeAsync(35);
-            var largeKennel = await kennelProcessor.GetKennelByAnimalSizeAsync(64);
-
-            Assert.IsTrue(smallKennel.name == "small");
-            Assert.IsTrue(mediumKennel.name == "medium");
-            Assert.IsTrue(largeKennel.name == "large");
-
-            //edge cases
-            smallKennel = await kennelProcessor.GetKennelByAnimalSizeAsync(.001);
-            Assert.IsTrue(smallKennel.name == "small");
-            smallKennel = await kennelProcessor.GetKennelByAnimalSizeAsync(20);
-            Assert.IsTrue(smallKennel.name == "small");
-
-            mediumKennel = await kennelProcessor.GetKennelByAnimalSizeAsync(20.01);
-            Assert.IsTrue(mediumKennel.name == "medium");
-            mediumKennel = await kennelProcessor.GetKennelByAnimalSizeAsync(50);
-            Assert.IsTrue(mediumKennel.name == "medium");
-
-            largeKennel = await kennelProcessor.GetKennelByAnimalSizeAsync(50.01);
-            Assert.IsTrue(largeKennel.name == "large");
-            largeKennel = await kennelProcessor.GetKennelByAnimalSizeAsync(99999);
-            Assert.IsTrue(largeKennel.name == "large");
-
+            var badResponse = await animalController.Add(null);
+            Assert.IsFalse(badResponse.IsSuccessStatusCode);
         }
 
         [TestMethod]
-        public async Task GetAnimalsInEachKennelAsyncTest()
+        public async Task RemoveAnimalByIdTest()
         {
             var kennelProcessor = new KennelProcessor(_mockContext.Object);
-            var report = await kennelProcessor.GetAnimalsInEachKennelAsync();
+            var animalProcessor = new AnimalProcessor(_mockContext.Object, kennelProcessor);
+            var animalController = new AnimalController(animalProcessor);
 
-            var smallKennelReport = report.Where(r => r.name == "small").FirstOrDefault();
-            var mediumKennelReport = report.Where(r => r.name == "medium").FirstOrDefault();
-            var largeKennelReport = report.Where(r => r.name == "large").FirstOrDefault();
+            animalController.Request = new HttpRequestMessage();
+            animalController.Configuration = new HttpConfiguration();
+            
+            var goodResponse = await animalController.RemoveById(1);
+            Assert.IsTrue(goodResponse.StatusCode == System.Net.HttpStatusCode.OK);
 
-            Assert.IsTrue(smallKennelReport.animals.Count == 2);
-            Assert.IsTrue(mediumKennelReport.animals.Count == 1);
-            Assert.IsTrue(largeKennelReport.animals.Count == 2);
+            var badResponse = await animalController.RemoveById(367); //does not exist
+            Assert.IsFalse(badResponse.IsSuccessStatusCode);
+        }
+
+        [TestMethod]
+        public async Task RemoveAnimalTest()
+        {
+            var kennelProcessor = new KennelProcessor(_mockContext.Object);
+            var animalProcessor = new AnimalProcessor(_mockContext.Object, kennelProcessor);
+            var animalController = new AnimalController(animalProcessor);
+
+            animalController.Request = new HttpRequestMessage();
+            animalController.Configuration = new HttpConfiguration();
+
+            var animalToRemove = new AnimalModel { name = "Fido", type = "Dog", sizeInLbs = 12 };
+
+            var goodResponse = await animalController.RemoveAnimal(animalToRemove);
+            Assert.IsTrue(goodResponse.StatusCode == System.Net.HttpStatusCode.OK);
+            
+            var badResponse = await animalController.RemoveAnimal(null);
+            Assert.IsFalse(badResponse.IsSuccessStatusCode);
+        }
+
+        [TestMethod]
+        public async Task ReorganizeAnimalsTest()
+        {
+            var kennelProcessor = new KennelProcessor(_mockContext.Object);
+            var animalProcessor = new AnimalProcessor(_mockContext.Object, kennelProcessor);
+            var animalController = new AnimalController(animalProcessor);
+
+            animalController.Request = new HttpRequestMessage();
+            animalController.Configuration = new HttpConfiguration();
+
+            var response = await animalController.ReorganizeAnimalsAsync();
+            Assert.IsTrue(response.StatusCode == System.Net.HttpStatusCode.OK);
         }
     }
 }

@@ -3,17 +3,21 @@ using System.Collections.Generic;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
-using System.Threading.Tasks;
 using AnimalHouse.BusinessLogic;
 using AnimalHouse.Data;
 using AnimalHouse.Model;
+using AnimalHouseAPI.Controllers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using Newtonsoft.Json;
+using System.Threading.Tasks;
+using System.Net.Http;
+using System.Web.Http;
 
-namespace AnimalHouse.Test
+namespace AnimalHouseAPI.Tests
 {
     [TestClass]
-    public class KennelProcessorTests
+    public class KennelControllerTests
     {
         private List<Kennel> _kennelData;
         private List<Animal> _animalData;
@@ -72,74 +76,20 @@ namespace AnimalHouse.Test
         }
 
         [TestMethod]
-        public async Task GetCorrectKennelSizeForAnimalAsync()
-        {
-            var kennelData = new List<Kennel>()
-            {
-                new Kennel {kennelId = 1, name = "small", maxLimit = 16, minAnimalSize = 0, maxAminalSize = 20},
-                new Kennel {kennelId = 2, name = "medium", maxLimit = 10, minAnimalSize = 20, maxAminalSize = 50},
-                new Kennel {kennelId = 3, name = "large", maxLimit = 8, minAnimalSize = 50, maxAminalSize = int.MaxValue}
-            }.AsQueryable();
-
-
-            var mockSet = new Mock<DbSet<Kennel>>();
-            mockSet.As<IDbAsyncEnumerable<Kennel>>()
-                .Setup(k => k.GetAsyncEnumerator())
-                .Returns(new TestDbAsyncEnumerator<Kennel>(kennelData.GetEnumerator()));
-
-            mockSet.As<IQueryable<Kennel>>()
-                .Setup(k => k.Provider)
-                .Returns(new TestDbAsyncQueryProvider<Kennel>(kennelData.Provider));
-
-            mockSet.As<IQueryable<Kennel>>().Setup(k => k.Expression).Returns(kennelData.Expression);
-            mockSet.As<IQueryable<Kennel>>().Setup(k => k.ElementType).Returns(kennelData.ElementType);
-            mockSet.As<IQueryable<Kennel>>().Setup(k => k.GetEnumerator()).Returns(kennelData.GetEnumerator());
-
-
-            var mockContext = new Mock<AnimalHouseDbContext>();
-            mockContext.Setup(k => k.Kennels).Returns(mockSet.Object);
-
-            var kennelProcessor = new KennelProcessor(mockContext.Object);
-
-            var smallKennel = await kennelProcessor.GetKennelByAnimalSizeAsync(12);
-            var mediumKennel = await kennelProcessor.GetKennelByAnimalSizeAsync(35);
-            var largeKennel = await kennelProcessor.GetKennelByAnimalSizeAsync(64);
-
-            Assert.IsTrue(smallKennel.name == "small");
-            Assert.IsTrue(mediumKennel.name == "medium");
-            Assert.IsTrue(largeKennel.name == "large");
-
-            //edge cases
-            smallKennel = await kennelProcessor.GetKennelByAnimalSizeAsync(.001);
-            Assert.IsTrue(smallKennel.name == "small");
-            smallKennel = await kennelProcessor.GetKennelByAnimalSizeAsync(20);
-            Assert.IsTrue(smallKennel.name == "small");
-
-            mediumKennel = await kennelProcessor.GetKennelByAnimalSizeAsync(20.01);
-            Assert.IsTrue(mediumKennel.name == "medium");
-            mediumKennel = await kennelProcessor.GetKennelByAnimalSizeAsync(50);
-            Assert.IsTrue(mediumKennel.name == "medium");
-
-            largeKennel = await kennelProcessor.GetKennelByAnimalSizeAsync(50.01);
-            Assert.IsTrue(largeKennel.name == "large");
-            largeKennel = await kennelProcessor.GetKennelByAnimalSizeAsync(99999);
-            Assert.IsTrue(largeKennel.name == "large");
-
-        }
-
-        [TestMethod]
-        public async Task GetAnimalsInEachKennelAsyncTest()
+        public async Task GetKennelReportTestAsync()
         {
             var kennelProcessor = new KennelProcessor(_mockContext.Object);
-            var report = await kennelProcessor.GetAnimalsInEachKennelAsync();
+            var kennelController = new KennelController(kennelProcessor);
 
-            var smallKennelReport = report.Where(r => r.name == "small").FirstOrDefault();
-            var mediumKennelReport = report.Where(r => r.name == "medium").FirstOrDefault();
-            var largeKennelReport = report.Where(r => r.name == "large").FirstOrDefault();
+            kennelController.Request = new HttpRequestMessage();
+            kennelController.Configuration = new HttpConfiguration();
 
-            Assert.IsTrue(smallKennelReport.animals.Count == 2);
-            Assert.IsTrue(mediumKennelReport.animals.Count == 1);
-            Assert.IsTrue(largeKennelReport.animals.Count == 2);
+            var response = await kennelController.Report();
+            
+            List<KennelAnimals> kennels;
+
+            Assert.IsTrue(response.TryGetContentValue(out kennels));
+            Assert.AreEqual(3, kennels.Count);
         }
     }
 }

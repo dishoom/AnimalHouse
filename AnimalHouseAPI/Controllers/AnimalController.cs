@@ -1,5 +1,7 @@
 ﻿using AnimalHouse.BusinessLogic;
+using AnimalHouse.Data;
 using AnimalHouse.Model;
+using AnimalHouseAPI.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,52 +21,112 @@ namespace AnimalHouseAPI.Controllers
             _animalProcessor = animalProcessor;
         }
 
-        public async Task<Animal> Get(int id)
+        public AnimalController()
         {
-            return await _animalProcessor.GetAnimalById(id);
-        }
-
-        public async Task PostAsync([FromBody]Animal value)
-        {
-            double lbs;
-
-            if (string.IsNullOrEmpty(value.name))
-                throw new ArgumentNullException("Name", "Name is required.");
-            if (string.IsNullOrEmpty(value.type))
-                throw new ArgumentNullException("Animal Type", "Animal type is required.");
-            if (!double.TryParse(value.sizeInLbs.ToString(), out lbs))
-                throw new ArgumentException("Size", "Size is not valid");
-
-            await _animalProcessor.AddAnimalToShelterAsync(value);
+            var context = new AnimalHouseDbContext();
+            var kennelProcessor = new KennelProcessor(context);
+            _animalProcessor = new AnimalProcessor(context, kennelProcessor);
         }
         
-        public async Task Delete(int id)
-        {
-            int animalId;
-
-            if (!int.TryParse(id.ToString(), out animalId))
-                throw new ArgumentException("Animal Id", "Animal Id is not valid");
-
-            await _animalProcessor.RemoveAnimalById(id);
-        }
-
-        public async Task DeleteByNameTypeSize(string name, string type, double sizeInLbs)
+        [Route("api/Animal/Add")]
+        [HttpPost]
+        public async Task<HttpResponseMessage> Add([FromBody]AnimalModel animal)
         {
             double lbs;
 
-            if (string.IsNullOrEmpty(name))
-                throw new ArgumentNullException("Name", "Name is required.");
-            if (string.IsNullOrEmpty(type))
-                throw new ArgumentNullException("Animal Type", "Animal type is required.");
-            if (!double.TryParse(sizeInLbs.ToString(), out lbs))
-                throw new ArgumentException("Size", "Size is not valid");
+            if (animal == null)
+                return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Animal info is required.");
+            if (string.IsNullOrEmpty(animal.name))
+                return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Name is required.");
+            if (string.IsNullOrEmpty(animal.type))
+                return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Animal type is required.");
+            if (!double.TryParse(animal.sizeInLbs.ToString(), out lbs))
+                return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Size is not valid.");
 
-            await _animalProcessor.RemoveAnimalByNameAndTypeAndSize(name, type, sizeInLbs);
+            try
+            {
+                var success = await _animalProcessor.AddAnimalToShelterAsync(new Animal { name = animal.name, type = animal.type, sizeInLbs = animal.sizeInLbs });
+
+                if (success)
+                    return Request.CreateResponse(HttpStatusCode.OK);
+                else
+                    return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Animal was not added to shelter.");
+            }
+            catch (Exception ex)
+            {
+                return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, "Error adding animal to shelter.", ex);
+            }
+            
         }
 
-        public async Task ReorganizeAnimalsAsync()
+        [Route("api/Animal/RemoveById")]
+        [HttpPost]
+        public async Task<HttpResponseMessage> RemoveById([FromBody] int animalId)
         {
-            await _animalProcessor.ReorganizeAnimalsToAppropriateKennels();
+            if (!int.TryParse(animalId.ToString(), out animalId))
+                return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Animal Id is not valid");
+
+            try
+            {
+                var success = await _animalProcessor.RemoveAnimalById(animalId);
+
+                if (success)
+                    return Request.CreateResponse(HttpStatusCode.OK);
+                else
+                    return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Animal was not removed.");
+            }
+            catch (Exception ex)
+            {
+                return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, "Error removing animal from shelter.", ex);
+            }
+        }
+
+        [Route("api/Animal/RemoveAnimal")]
+        [HttpPost]
+        public async Task<HttpResponseMessage> RemoveAnimal([FromBody]AnimalModel animal)
+        {
+            double lbs;
+
+            if (animal == null)
+                return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Animal info is required.");
+            if (string.IsNullOrEmpty(animal.name))
+                return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Name is required.");
+            if (string.IsNullOrEmpty(animal.type))
+                return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Animal type is required.");
+            if (!double.TryParse(animal.sizeInLbs.ToString(), out lbs))
+                return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Size is not valid.");
+
+            try
+            {
+                var success = await _animalProcessor.RemoveAnimalByNameAndTypeAndSize(animal.name, animal.type, animal.sizeInLbs);
+                if (success)
+                    return Request.CreateResponse(HttpStatusCode.OK);
+                else
+                    return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Animal was not removed.");
+            }
+            catch (Exception ex)
+            {
+                return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, "Error removing animal from shelter.", ex);
+            }            
+        }
+
+        [Route("api/Animal/ReorganizeAnimals")]
+        [HttpGet]
+        public async Task<HttpResponseMessage> ReorganizeAnimalsAsync()
+        {
+            try
+            {
+                var success = await _animalProcessor.ReorganizeAnimalsToAppropriateKennels();
+
+                if (success)
+                    return Request.CreateResponse(HttpStatusCode.OK);
+                else
+                    return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Could not reorganize, animal(s) will be left behind."); //consideration: create custom exception for this specific outcome and relay to back to user
+            }
+            catch (Exception ex)
+            {
+                return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, $"Error reorganizing animals.", ex);
+            }
         }
     }
 }
